@@ -2,7 +2,6 @@
 import tkinter as tk
 from tkinter import ttk
 from num2words import num2words
-import pywinstyles
 
 
 # Diccionario de colindancias
@@ -27,9 +26,11 @@ def focus_next(event):
     event.widget.tk_focusNext().focus()
     return "break"
 
+
 def focus_prev(event):
     event.widget.tk_focusPrev().focus()
     return "break"
+
 
 def formatear_medida(medida):
     m_cm_c = medida.split(".") 
@@ -37,6 +38,7 @@ def formatear_medida(medida):
     cm = int(m_cm_c[1]) if len(m_cm_c) == 3 else 0
     colindancia = m_cm_c[len(m_cm_c) - 1]
     return m, cm, colindancia
+
 
 def actualizar_medida(*args):
     try:
@@ -84,9 +86,11 @@ def actualizar_medida(*args):
     except Exception as e:
         label_resultado.config(text=ERROR_TEXTO)
 
+
 def limpiar_campos():
     entry_medida.delete(0, tk.END)
     entry_medida.focus()
+
 
 def copiar_medida(event=None):
     if label_resultado.cget("text") != ERROR_TEXTO:
@@ -114,8 +118,8 @@ def copiar_area(event=None):
 
     # Aregar la medida al historial
     if area not in historial:
-        historial.insert(0, area)  # Insertar al inicio de la lista
-        if len(historial) > 100:  # Limitar el historial a 100 elementos
+        historial.insert(0, area)  
+        if len(historial) > 100:  
             historial.pop()
     actualizar_historial()
     limpiar_campos()
@@ -152,6 +156,7 @@ def formatear_superficie(m2, cm2, c):
         colindancia_formateada = f"{colindancia}"
     tipo_area = "área común" if comun else "área privativa"
     return colindancia_formateada, tipo_area, m2_txt, cm2_txt
+
 
 def desc_area(event=None):
     try:
@@ -308,25 +313,17 @@ root.bind('<Control-f>', borrar_historial)
 root.tk.call('source', 'azure.tcl')
 root.tk.call("set_theme", "dark")
 
-pywinstyles.change_title_color(root, color="white")
-pywinstyles.change_header_color(root, color="black")
-
-
 # Frame principal
 main_frame = ttk.Frame(root, padding="20")
 main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 main_frame.columnconfigure(0, weight=1)
 main_frame.columnconfigure(1, weight=1)
 
-
-
-
 # Crear y ubicar etiquetas y entradas
 ttk.Label(main_frame, text="Colindancia/Descripcion:", justify="center").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
 entry_medida = ttk.Entry(main_frame)
 entry_medida.grid(row=1, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
 entry_medida.focus_set()
-
 
 # Label para mostrar el resultado
 label_resultado = ttk.Label(main_frame, text=ERROR_TEXTO, wraplength=600, justify="center")
@@ -393,11 +390,9 @@ entry_colindancia_var.trace_add("write", actualizar_medida)
 
 entry_medida.config(textvariable=entry_metros_var)
 
-
 # Configurar el grid para que sea expansible
 root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(0, weight=1)
-
 
 # Ejecutar el bucle principal
 root.mainloop()
