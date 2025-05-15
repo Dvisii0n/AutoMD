@@ -14,7 +14,7 @@ class csv_format_tool():
                 area_num = row[0]
                 area_name = row[1]
                 area_type = "COMUN" 
-                if row[2] == "AC":
+                if row[2] != "AC":
                     area_type = "PRIVATIVA"
 
                 template[int(row[0])] = f"AREA {area_type} ({area_num}) {area_name}\nDESCRIPCION:\nAL NORESTE:\nAL SURESTE:\nAL ORIENTE:\nAL PONIENTE:\n \n"
@@ -34,6 +34,4 @@ class csv_format_tool():
     
 
 
-tool = csv_format_tool()
 
-t = tool.upload_csv(file_path="file.csv")
