@@ -1,6 +1,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from csv_formatter import csv_format_tool
 from num2words import num2words
 
 
@@ -20,7 +21,10 @@ colindancias = {
 # Lista para almacenar el historial
 historial = []
 
-ERROR_TEXTO = "Ingresar el siguiente formato: [<m>.<cm>.<colindancia>] o [<m2>.<cm2>.<nombre del area>]"
+ERROR_TEXTO = "Ingresar el siguiente formato: [<m>.<cm>.<colindancia>]"
+
+csvtool = csv_format_tool()
+
 
 def focus_next(event):
     event.widget.tk_focusNext().focus()
@@ -199,7 +203,7 @@ def abrir_ventana_areas(event=None):
     # Crear una nueva ventana
     ventana_areas = tk.Toplevel(root)
     ventana_areas.title("Superficies Techada y No Techada")
-    ventana_areas.geometry("300x150")
+    ventana_areas.geometry("350x150")
 
     # Crear y ubicar etiquetas y entradas
     ttk.Label(ventana_areas, text="Sup. Techada (m²):").grid(row=0, column=0, padx=5, pady=5)
@@ -284,7 +288,6 @@ def copiar_historial_entero(event=None):
         root.clipboard_clear()
         root.clipboard_append(historial_formateado)
         label_copiado.config(text="Historial completo copiado")
-        label_resultado.config(text=historial_formateado, justify="left")
         root.after(3000, lambda: label_copiado.config(text=""))
     else:
         label_copiado.config(text="El historial está vacío")
@@ -298,10 +301,93 @@ def borrar_historial(event=None):
     label_copiado.config(text="Historial borrado")
     root.after(3000, lambda: label_copiado.config(text=""))
 
+
+def ventana_csv(event=None):
+    ventana = tk.Toplevel(root)
+    ventana.title("Subir Csv")
+    ventana.geometry("275x250")
+    
+
+    label = ttk.Label(ventana, text="Especifica la ubicacion del archivo .csv")
+    label.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=5, pady=5)
+
+    entry = ttk.Entry(ventana)
+    entry.grid(row=1, column=0, sticky=(tk.W, tk.E), padx=5, pady=5)
+
+    label_excepcion = ttk.Label(ventana, text="")
+    label_excepcion.grid(row=2, column=0, sticky=(tk.W, tk.E), padx=5, pady=5)
+    
+    def copiar_plantilla():
+        try:
+            with open("template.txt") as t:
+                plantilla = t.read()
+                root.clipboard_clear()
+                root.clipboard_append(plantilla)
+                label_excepcion.config(text="Plantilla copiada al portapapeles", foreground="green")
+                ventana.after(3000, lambda : label_excepcion.config(text="", foreground="#ffffff"))
+        except Exception as e:
+            label_excepcion.config(text="No se encontro la plantilla", foreground="red")
+            ventana.after(3000, lambda : label_excepcion.config(text="", foreground="#ffffff"))
+            return
+            
+
+    def subir_csv():
+        try:    
+            ubicacion = entry.get()
+            csvtool.upload_csv(file_path=ubicacion)
+            label_excepcion.config(text="Plantilla generada con exito")
+        
+        except Exception as e:
+            label_excepcion.config(text="Ubicacion del archivo .csv invalida", foreground="red")
+            ventana.after(3000, lambda : label_excepcion.config(text="", foreground="#ffffff"))
+            return
+    
+    def mostrar_plantilla():
+        try:
+            with open("template.txt") as t:
+                    plantilla = t.read()
+                    
+                    wintxt = tk.Tk()
+                    wintxt.title("Plantilla")
+                    wintxt.geometry("500x600")
+ 
+                    frame_txt = ttk.Frame(wintxt)
+                    frame_txt.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
+                    
+                    vbar = ttk.Scrollbar(frame_txt)
+                    vbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+                    txt = tk.Text(frame_txt, background="#333333", foreground="#ffffff")
+                    txt.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+
+                    txt.configure(yscrollcommand=vbar.set)
+                    vbar.configure(command=txt.yview)
+
+                    txt.insert(tk.END, plantilla)
+                            
+                    wintxt.mainloop()
+                    
+        except Exception as e:
+            label_excepcion.config(text="No se encontro la plantilla", foreground="red")
+            ventana.after(3000, lambda : label_excepcion.config(text="", foreground="#ffffff"))
+            return
+        
+    
+    subirbtn = ttk.Button(ventana, text="Subir", command=subir_csv) 
+    subirbtn.grid(row=3, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+    
+    copiar = ttk.Button(ventana, text="Copiar Plantilla", command=copiar_plantilla) 
+    copiar.grid(row=4, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+    
+    mostrar = ttk.Button(ventana, text="Ver Plantilla", command=mostrar_plantilla) 
+    mostrar.grid(row=5, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+
+    
 # Crear la ventana principal con tema
 root = tk.Tk()
 root.title("AutoMD v1.0")
-root.geometry("650x700")
+root.geometry("650x750")
+
 
 #Binds
 root.bind('<Return>', copiar_medida)
@@ -341,13 +427,16 @@ boton_area.grid(row=5, column=0, sticky=(tk.W, tk.E), pady= 5)
 boton_desc_area_tnt = ttk.Button(main_frame, text="(Ctrl+T) Desc Area T/NT", command=abrir_ventana_areas)
 boton_desc_area_tnt.grid(row=6, column=0, sticky=(tk.W, tk.E), pady= 5)
 
+boton_csv = ttk.Button(main_frame, text="Generar Plantilla", command=ventana_csv)
+boton_csv.grid(row=7, column=0, sticky=(tk.W, tk.E), pady= 5)
+
 # Label para mostrar el mensaje de copiado
 label_copiado = ttk.Label(main_frame, text="", foreground="green")
-label_copiado.grid(row=7, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+label_copiado.grid(row=8, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
 
 # Frame para el historial
 historial_frame = ttk.Frame(main_frame)
-historial_frame.grid(row=8, columnspan=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5, pady=5)
+historial_frame.grid(row=9, columnspan=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5, pady=5)
 historial_frame.columnconfigure(0, weight=1)
 
 ttk.Label(historial_frame, text="Historial:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
@@ -368,7 +457,7 @@ historial_tree.configure(yscrollcommand=scrollbar.set)
 
 # Frame para los botones de historial
 botones_frame = ttk.Frame(main_frame)
-botones_frame.grid(row=9, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+botones_frame.grid(row=10, columnspan=1, sticky=(tk.W, tk.E), padx=5, pady=5)
 botones_frame.columnconfigure(0, weight=1)
 botones_frame.columnconfigure(1, weight=1)
 
