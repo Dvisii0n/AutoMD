@@ -1,2 +1,7 @@
+altgraph==0.17.4
 docopt==0.6.2
 num2words==0.5.14
+packaging==25.0
+pyinstaller==6.13.0
+pyinstaller-hooks-contrib==2025.4
+setuptools==80.4.0
